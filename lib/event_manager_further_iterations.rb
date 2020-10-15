@@ -43,9 +43,17 @@ def clean_phone_number(phone_number)
   end
 end
 
-puts "EventManager Initialized."
+def fill_hash(time, hash)
+  if hash.has_key? time
+    hash[time] += 1
+  else
+    hash[time] = 1
+  end
+end
 
-contents = CSV.open 'event_attendees.csv', headers: true, header_converters: :symbol
+def popular_order (hash)
+  hash.sort_by { |key, value| -value }.to_h
+end
 
 def thank_you_letters(contents) #for if we want to send letters to attendees
   template_letter = File.read 'form_letter.erb'
@@ -74,5 +82,53 @@ def phone_contact(contents) #for mobile alerts
   end
 end
 
+def time_targeting(contents) #for targeting online adds to popular hours of the day
+  reg_hours_hash = {}
+  contents.each do |row|
+    reg_date = row[:regdate]
 
+    date = DateTime.strptime(reg_date, '%m/%d/%y %k:%M')
 
+    hour = date.hour
+    
+    fill_hash(hour, reg_hours_hash)
+  end
+
+  hours_by_popularity = popular_order(reg_hours_hash)
+
+  hours_by_popularity
+end
+
+def day_of_the_week_targeting(contents) #for specifying day of the week to target
+  reg_days_hash = {}
+  contents.each do |row|
+    reg_date = row[:regdate]
+
+    date = DateTime.strptime(reg_date, '%m/%d/%y %k:%M')
+
+    day = date.strftime("%A")
+
+    fill_hash(day, reg_days_hash)
+  end
+
+  days_by_popularity = popular_order(reg_days_hash)
+
+  days_by_popularity
+end
+
+def most_popular (time_hash)
+  popular = time_hash.first(2).to_h
+  popular.each_pair { |time, value| puts "#{time} was popular with #{value} hits"}
+end
+puts "EventManager Initialized."
+
+contents = CSV.read 'event_attendees.csv', headers: true, header_converters: :symbol
+#changed from 'open' to 'read' as program isn't changing data, and this way multiple methods can run without needing to reopen the document
+
+day = day_of_the_week_targeting(contents)
+time = time_targeting(contents)
+
+most_popular(day)
+most_popular(time)
+
+#output could be tweaked further to comply with a particular format/report as needed
