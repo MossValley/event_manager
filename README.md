@@ -8,6 +8,5 @@ Instead of having a seperate branch dealing with the same program I opted for ha
 The event_manager.rb file contains the intial part of the tutorial portion of the project. The event_manager_futher_iterations.rb file has an extended version of the same program with some suggested iterations from the project page for cleaning phone number formats and finding peak hours & days of user activity.
 
 **Things to complete**
-* Clean phone number data
 * Time targeting
 * Day of the week targeting
